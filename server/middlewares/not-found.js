@@ -4,4 +4,4 @@ const notFound = (req, res, next) => {
   next(error); // Pass the error to the errorHandler middleware
 };
 
-module.exports = notFound
+module.exports = notFound;
