@@ -1,5 +1,6 @@
 const Task = require('../models/Task');
 const asyncHandler = require('express-async-handler');
+const { validateTask, validateTaskUpdate } = require('../validations/taskValidation');
 
 /**
  * @description Get all tasks
@@ -14,9 +15,12 @@ const getAllTasks = asyncHandler ( async (req, res) => {
 /**
  * @description Create a task
  * @route POST /api/v1/tasks
- * @access Public
+ * @access Private
  */
-const createTask = asyncHandler ( async (req, res) => {
+const createTask = asyncHandler(async (req, res) => {
+  const { error } = validateTask(req.body);
+  if (error) return res.status(400).json({ msg: error.details[0].message });
+
   const task = await Task.create(req.body);
   res.status(201).json({ task });
 });
@@ -26,7 +30,7 @@ const createTask = asyncHandler ( async (req, res) => {
  * @route GET /api/v1/tasks/:id
  * @access Public
  */
-const getTask = asyncHandler ( async (req, res) => {
+const getTask = asyncHandler(async (req, res) => {
   const { id: taskID } = req.params;
   const task = await Task.findOne({ _id: taskID });
   if (!task) return res.status(404).json({ msg: `No task with id: ${taskID}` });
@@ -39,7 +43,10 @@ const getTask = asyncHandler ( async (req, res) => {
  * @route PATCH /api/v1/tasks/:id
  * @access Public
  */
-const updateTask = asyncHandler ( async (req, res) => {
+const updateTask = asyncHandler(async (req, res) => {
+  const { error } = validateTaskUpdate(req.body);
+  if (error) return res.status(400).json({ msg: error.details[0].message });
+
   const { id: taskID } = req.params;
   const task = await Task.findOneAndUpdate({ _id: taskID }, req.body, {
     new: true,

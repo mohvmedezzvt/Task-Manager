@@ -3,9 +3,14 @@ const mongoose = require('mongoose');
 const TaskSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'should have a name'],
+    required: true,
     trim: true,
-    maxlength: [20, 'name can not be more than 20 characters'],
+    maxlength: 20,
+  },
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
   },
   completed: {
     type: Boolean,
