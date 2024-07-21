@@ -20,7 +20,7 @@ exports.getCurrentUser = asyncHandler(async (req, res) => {
  * @access  Private
  */
 exports.updateUser = asyncHandler(async (req, res) => {
-  const { error } = validateUpdate(req.body);
+  const { error } = validateUpdate(req.body)
   if (error) return res.status(400).json({ message: error.details[0].message });
 
   const user = await User.findByIdAndUpdate(
