@@ -5,13 +5,7 @@ const logger = require('./middlewares/logger');
 const notFound = require('./middlewares/not-found');
 const errorHandler = require('./middlewares/error-handler');
 
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const taskRoutes = require('./routes/tasks');
-const notificationRoutes = require('./routes/notifications');
-
 require('dotenv').config();
-
 
 // Middlewares
 app.use(express.static('./public'));
@@ -19,10 +13,11 @@ app.use(express.json());
 app.use(logger);
 
 // Routes
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/tasks', taskRoutes);
-app.use('/api/v1/notifications', notificationRoutes); 
+app.use('/api/v1/auth', require('./routes/auth'));
+app.use('/api/v1/users', require('./routes/users'));
+app.use('/api/v1/tasks', require('./routes/tasks'));
+app.use('/api/v1/projects', require('./routes/projects'));
+app.use('/api/v1/notifications', require('./routes/notifications')); 
 
 // Error handling
 app.use(notFound);

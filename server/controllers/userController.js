@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Project = require('../models/Project');
 const asyncHandler = require('express-async-handler');
 const { validateUpdate } = require('../validations/userValidation');
 
@@ -8,10 +9,15 @@ const { validateUpdate } = require('../validations/userValidation');
  * @access  Private
  */
 exports.getCurrentUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id).select('-password');
+  const user = await User.findById(req.user._id).select('-password')
+                                                .populate({
+                                                  path: 'projects',
+                                                  select: 'name',
+                                                });
+
   if (!user) return res.status(404).json({ message: 'User not found' });
 
-  res.status(200).json(user);
+  res.status(200).json({ user });
 });
 
 /**

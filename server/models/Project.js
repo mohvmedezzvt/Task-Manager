@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const taskSchema = new mongoose.Schema({
+const projectSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -12,30 +12,21 @@ const taskSchema = new mongoose.Schema({
     type: String,
     maxlength: 500,
   },
-  status: {
-    type: String,
-    enum: ['pending', 'in-progress', 'completed'],
-    default: 'pending',
-  },
-  dueDate: {
-    type: Date,
-  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-  assignedTo: {
+  members: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-  },
-  project: {
+  }],
+  tasks: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Project',
-    required: true,
-  },
+    ref: 'Task',
+  }],
 }, { timestamps: true });
 
-const Task = mongoose.model('Task', taskSchema);
+const Project = mongoose.model('Project', projectSchema);
 
-module.exports = Task;
+module.exports = Project;

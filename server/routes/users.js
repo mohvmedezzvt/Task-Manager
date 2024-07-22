@@ -7,7 +7,7 @@ const {
   deleteUser,
 } = require('../controllers/userController');
 
-
+// /api/v1/users/me
 router.route('/me')
       .get(auth, getCurrentUser)
       .patch(auth, updateUser)

@@ -2,10 +2,12 @@ const Joi = require('joi');
 
 const validateTask = (task) => {
   const schema = Joi.object({
-    name: Joi.string().max(20).required(),
-    assignedTo: Joi.string().required(),
-    status: Joi.string().valid('Pending', 'In Progress', 'Completed'),
-    dueDate: Joi.date(),
+    name: Joi.string().min(3).max(50).required(),
+    description: Joi.string().max(500),
+    status: Joi.string().valid('pending', 'in-progress', 'completed').default('pending'),
+    dueDate: Joi.date().optional(),
+    assignedTo: Joi.string().optional(),
+    project: Joi.string().required(),
   });
 
   return schema.validate(task);
@@ -13,11 +15,13 @@ const validateTask = (task) => {
 
 const validateTaskUpdate = (task) => {
   const schema = Joi.object({
-    name: Joi.string().trim().max(20),
-    assignedTo: Joi.string(),
-    status: Joi.string().valid('Pending', 'In Progress', 'Completed'),
-    dueDate: Joi.date(),
-  });
+    name: Joi.string().trim().min(3).max(50),
+    description: Joi.string().trim().max(500),
+    status: Joi.string().valid('pending', 'in-progress', 'completed'),
+    dueDate: Joi.date().optional(),
+    assignedTo: Joi.string().optional(),
+    project: Joi.string(),
+  }).min(1);
 
   return schema.validate(task);
 };
