@@ -21,10 +21,15 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6,
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
+  },
 });
 
 userSchema.methods.generateAuthToken = function () {
-  return jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
+  return jwt.sign({ _id: this._id, role: this.role }, process.env.JWT_SECRET, {
     expiresIn: '1h',
   });
 };

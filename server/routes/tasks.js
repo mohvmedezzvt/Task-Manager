@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middlewares/auth');
+const authorize = require('../middlewares/authorize');
 const {
   getAllTasks,
   createTask,
@@ -12,11 +13,11 @@ const {
 
 router.route('/')
       .get(auth, getAllTasks)
-      .post(auth, createTask);
+      .post(auth, authorize(['admin', 'user']), createTask);
 
 router.route('/:id')
       .get(auth, getTask)
-      .patch(auth, updateTask)
-      .delete(auth, deleteTask);
+      .patch(auth, authorize(['admin', 'user']), updateTask)
+      .delete(auth, authorize(['admin']), deleteTask);
 
 module.exports = router;

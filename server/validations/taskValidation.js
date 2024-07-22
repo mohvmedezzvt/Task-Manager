@@ -4,7 +4,8 @@ const validateTask = (task) => {
   const schema = Joi.object({
     name: Joi.string().max(20).required(),
     assignedTo: Joi.string().required(),
-    completed: Joi.boolean(),
+    status: Joi.string().valid('Pending', 'In Progress', 'Completed').required(),
+    dueDate: Joi.date(),
   });
 
   return schema.validate(task);
@@ -12,9 +13,10 @@ const validateTask = (task) => {
 
 const validateTaskUpdate = (task) => {
   const schema = Joi.object({
-    name: Joi.string().max(20),
+    name: Joi.string().trim().max(20),
     assignedTo: Joi.string(),
-    completed: Joi.boolean(),
+    status: Joi.string().valid('Pending', 'In Progress', 'Completed'),
+    dueDate: Joi.date(),
   });
 
   return schema.validate(task);

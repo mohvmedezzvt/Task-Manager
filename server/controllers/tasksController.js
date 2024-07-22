@@ -8,7 +8,7 @@ const { validateTask, validateTaskUpdate } = require('../validations/taskValidat
  * @access Public
  */
 const getAllTasks = asyncHandler ( async (req, res) => {
-  const tasks = await Task.find({});
+  const tasks = await Task.find({}).populate('assignedTo', 'username email');
   res.status(200).json({ tasks, amount: tasks.length });
 });
 
@@ -32,7 +32,7 @@ const createTask = asyncHandler(async (req, res) => {
  */
 const getTask = asyncHandler(async (req, res) => {
   const { id: taskID } = req.params;
-  const task = await Task.findOne({ _id: taskID });
+  const task = await Task.findOne({ _id: taskID }).populate('assignedTo', 'username email');
   if (!task) return res.status(404).json({ msg: `No task with id: ${taskID}` });
 
   res.status(200).json({ task });
@@ -51,7 +51,7 @@ const updateTask = asyncHandler(async (req, res) => {
   const task = await Task.findOneAndUpdate({ _id: taskID }, req.body, {
     new: true,
     runValidators: true,
-  });
+  }).populate('assignedTo', 'username email');
   if (!task) return res.status(404).json({ msg: `No task with id: ${taskID}` });
 
   res.status(200).json({ task });

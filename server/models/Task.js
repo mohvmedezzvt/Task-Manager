@@ -1,3 +1,4 @@
+const { required } = require('joi');
 const mongoose = require('mongoose');
 
 const TaskSchema = new mongoose.Schema({
@@ -12,9 +13,14 @@ const TaskSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  completed: {
-    type: Boolean,
-    default: false,
+  status: {
+    type: String,
+    enum: ['Pending', 'In Progress', 'Completed'],
+    default: 'Pending',
+  },
+  dueDate: {
+    type: Date,
+    required: false,
   },
 });
 
