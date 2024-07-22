@@ -12,7 +12,7 @@ const {
 
 
 router.route('/')
-      .get(auth, getAllTasks)
+      .get(auth, authorize(['admin', 'user']), getAllTasks)
       .post(auth, authorize(['admin', 'user']), createTask);
 
 router.route('/:id')
