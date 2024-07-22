@@ -8,6 +8,7 @@ const errorHandler = require('./middlewares/error-handler');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const taskRoutes = require('./routes/tasks');
+const notificationRoutes = require('./routes/notifications');
 
 require('dotenv').config();
 
@@ -21,6 +22,7 @@ app.use(logger);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/tasks', taskRoutes);
+app.use('/api/v1/notifications', notificationRoutes); 
 
 // Error handling
 app.use(notFound);

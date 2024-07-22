@@ -1,6 +1,11 @@
 const Task = require('../models/Task');
+const Notification = require('../models/Notification');
 const asyncHandler = require('express-async-handler');
 const { validateTask, validateTaskUpdate } = require('../validations/taskValidation');
+
+const createNotification = async (userId, message) => {
+  await Notification.create({ user: userId, message });
+};
 
 /**
  * @description Get all tasks
@@ -22,6 +27,10 @@ const createTask = asyncHandler(async (req, res) => {
   if (error) return res.status(400).json({ msg: error.details[0].message });
 
   const task = await Task.create(req.body);
+  if (task.assignedTo) {
+    await createNotification(task.assignedTo, `You have been assigned a new task: ${task.title}`);
+  }
+
   res.status(201).json({ task });
 });
 
@@ -53,6 +62,9 @@ const updateTask = asyncHandler(async (req, res) => {
     runValidators: true,
   }).populate('assignedTo', 'username email');
   if (!task) return res.status(404).json({ msg: `No task with id: ${taskID}` });
+  if (task.assignedTo) {
+    await createNotification(task.assignedTo, `Task: ${task.title} has been updated`);
+  }
 
   res.status(200).json({ task });
 });
