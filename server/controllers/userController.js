@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const Project = require('../models/Project');
 const asyncHandler = require('express-async-handler');
 const { validateUpdate } = require('../validations/userValidation');
 

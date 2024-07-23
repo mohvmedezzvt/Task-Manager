@@ -7,11 +7,12 @@ const {
   createProject,
   updateProject,
   deleteProject,
-  addTaskToProject,
+} = require('../controllers/projectController');
+const {
   getProjectMembers,
   addMemberToProject,
   removeMemberFromProject,
-} = require('../controllers/projectController');
+} = require('../controllers/projectMemberController');
 const {
   getAllTasks,
   createTask,

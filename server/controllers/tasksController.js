@@ -4,10 +4,6 @@ const Notification = require('../models/Notification');
 const asyncHandler = require('express-async-handler');
 const { validateTask, validateTaskUpdate } = require('../validations/taskValidation');
 
-const createNotification = async (userId, message) => {
-  await Notification.create({ user: userId, message });
-};
-
 /**
  * @description Get all tasks for the user
  * @route GET /api/v1/projects/:projectId/tasks
@@ -67,7 +63,11 @@ exports.createTask = asyncHandler(async (req, res) => {
   await project.save();
 
   if (assignedTo) {
-    createNotification(assignedTo, `You have been assigned a new task: ${name}`);
+    const notification = new Notification({
+      user: assignedTo,
+      message: `You have been assigned a new task: ${name}`,
+    });
+    await notification.save();
   }
 
   res.status(201).json({ task });
