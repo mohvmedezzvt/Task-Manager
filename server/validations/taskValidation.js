@@ -7,7 +7,6 @@ const validateTask = (task) => {
     status: Joi.string().valid('pending', 'in-progress', 'completed').default('pending'),
     dueDate: Joi.date().optional(),
     assignedTo: Joi.string().optional(),
-    project: Joi.string().required(),
   });
 
   return schema.validate(task);
@@ -20,7 +19,6 @@ const validateTaskUpdate = (task) => {
     status: Joi.string().valid('pending', 'in-progress', 'completed'),
     dueDate: Joi.date().optional(),
     assignedTo: Joi.string().optional(),
-    project: Joi.string(),
   }).min(1);
 
   return schema.validate(task);

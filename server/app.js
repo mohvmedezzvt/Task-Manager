@@ -15,7 +15,6 @@ app.use(logger);
 // Routes
 app.use('/api/v1/auth', require('./routes/auth'));
 app.use('/api/v1/users', require('./routes/users'));
-app.use('/api/v1/tasks', require('./routes/tasks'));
 app.use('/api/v1/projects', require('./routes/projects'));
 app.use('/api/v1/notifications', require('./routes/notifications')); 
 

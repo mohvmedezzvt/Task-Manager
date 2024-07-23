@@ -10,48 +10,46 @@ const createNotification = async (userId, message) => {
 
 /**
  * @description Get all tasks for the user
- * @route GET /api/v1/tasks
+ * @route GET /api/v1/projects/:projectId/tasks
  * @access Private
  */
 exports.getAllTasks = asyncHandler ( async (req, res) => {
   const tasks = await Task.find({ createdBy: req.user._id })
                           .populate('assignedTo', 'username email')
-                          .populate('createdBy', 'username')
-                          .populate('project', 'name')
                           .exec();
 
-  if (!tasks.length) return res.status(404).json({ msg: 'No tasks found' });
+  if (!tasks.length) return res.status(404).json({ message: 'No tasks found' });
   res.status(200).json({ tasks });
 });
 
 /**
  * @description Get a single task by ID
- * @route GET /api/v1/tasks/:id
- * @access Public
+ * @route GET /api/v1/projects/:projectId/tasks/:taskId
+ * @access Private
  */
 exports.getTask = asyncHandler(async (req, res) => {
-  const task = await Task.findById(req.params.id)
+  const task = await Task.findById(req.params.taskId)
                          .populate('assignedTo', 'username email')
-                         .populate('project', 'name')
                          .exec();
 
   if (!task) return res.status(404).json({ message: 'Task not found' });
+
   res.status(200).json({ task });
 });
 
 /**
- * @description Create a new task
- * @route POST /api/v1/tasks
+ * @description Create a new task and assign it to a project
+ * @route POST /api/v1/projects/:projectId/tasks
  * @access Private
  */
 exports.createTask = asyncHandler(async (req, res) => {
   const { error } = validateTask(req.body);
   if (error) return res.status(400).json({ msg: error.details[0].message });
 
-  const { name, description, status, dueDate, assignedTo, project } = req.body;
+  const { name, description, status, dueDate, assignedTo } = req.body;
 
-  const projectExists = await Project.findById(project);
-  if (!projectExists) return res.status(404).json({ msg: `No project with id: ${project}` });
+  const project = await Project.findById(req.params.projectId);
+  if (!project) return res.status(404).json({ message: `No project with id: ${req.params.projectId}` });
 
   const task = new Task({
     name,
@@ -60,12 +58,13 @@ exports.createTask = asyncHandler(async (req, res) => {
     dueDate,
     createdBy: req.user._id,
     assignedTo,
-    project,
+    project: req.params.projectId,
   });
 
   await task.save();
-  projectExists.tasks.push(task._id);
-  await projectExists.save();
+
+  project.tasks.push(task._id);
+  await project.save();
 
   if (assignedTo) {
     createNotification(assignedTo, `You have been assigned a new task: ${name}`);
@@ -76,40 +75,40 @@ exports.createTask = asyncHandler(async (req, res) => {
 
 /**
  * @description Update a task by ID
- * @route PATCH /api/v1/tasks/:id
+ * @route PATCH /api/v1/projects/:projectId/tasks/:taskId
  * @access Private
  */
 exports.updateTask = asyncHandler(async (req, res) => {
   const { error } = validateTaskUpdate(req.body);
-  if (error) return res.status(400).json({ msg: error.details[0].message });
+  if (error) return res.status(400).json({ message: error.details[0].message });
 
-  const task = await Task.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true, runValidators: true }
-  ).populate('assignedTo', 'username email')
-   .populate('project', 'name')
-   .exec();
+  const task = await Task.findById(req.params.taskId);
+  if (!task) return res.status(404).json({ message: `No task with id: ${req.params.taskId}` });
 
-  if (!task) return res.status(404).json({ msg: `No task with id: ${req.params.id}` });
+  task.name = req.body.name !== undefined ? req.body.name : task.name;
+  task.description = req.body.description !== undefined ? req.body.description : task.description;
+  task.status = req.body.status !== undefined ? req.body.status : task.status;
+  task.dueDate = req.body.dueDate !== undefined ? req.body.dueDate : task.dueDate;
+  task.assignedTo = req.body.assignedTo !== undefined ? req.body.assignedTo : task.assignedTo;
 
+  await task.save();
   res.status(200).json({ task });
 });
 
 /**
  * @description Delete task by ID
- * @route DELETE /api/v1/tasks/:id
+ * @route DELETE /api/v1/projects/:projectId/tasks/:taskId
  * @access Private
  */
 exports.deleteTask = asyncHandler ( async (req, res) => {
-  const task = await Task.findByIdAndDelete(req.params.id);
-  if (!task) return res.status(404).json({ msg: `No task with id: ${req.params.id}` });
+  const task = await Task.findById(req.params.taskId);
+  if (!task) return res.status(404).json({ message: `No task with id: ${req.params.taskId}` });
 
-  // Remove the task from the project
-  await Project.updateOne(
-    { _id: task.project },
-    { $pull: { tasks: task._id } }
-  );
+  await Task.findByIdAndDelete(req.params.taskId);
 
-  res.status(200).json('Task deleted successfully');
+  const project = await Project.findById(req.params.projectId);
+  project.tasks = project.tasks.filter(taskId => taskId.toString() !== req.params.taskId);
+  await project.save();
+
+  res.status(200).json({ message: 'Task deleted successfully' });
 });
