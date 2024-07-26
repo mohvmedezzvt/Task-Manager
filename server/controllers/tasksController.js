@@ -1,6 +1,6 @@
 const Task = require('../models/Task');
 const Project = require('../models/Project');
-const Notification = require('../models/Notification');
+const createTaskNotification = require('../middlewares/notification');
 const asyncHandler = require('express-async-handler');
 const { validateTask, validateTaskUpdate } = require('../validations/taskValidation');
 
@@ -62,6 +62,8 @@ exports.createTask = asyncHandler(async (req, res) => {
   project.tasks.push(task._id);
   await project.save();
 
+  await createTaskNotification(req.params.projectId, `A new task "${task.name}" has been created in the project "${project.name}"`);
+
   if (assignedTo) {
     const notification = new Notification({
       user: assignedTo,
@@ -92,6 +94,16 @@ exports.updateTask = asyncHandler(async (req, res) => {
   task.assignedTo = req.body.assignedTo !== undefined ? req.body.assignedTo : task.assignedTo;
 
   await task.save();
+
+  await createTaskNotification(req.params.projectId, `The task "${task.name}" has been updated in the project "${task.project.name}"`);
+
+  if (req.body.assignedTo) {
+    const notification = new Notification({
+      user: req.body.assignedTo,
+      message: `You have been assigned a new task: ${task.name}`,
+    });
+    await notification.save();
+  }
   res.status(200).json({ task });
 });
 
@@ -109,6 +121,8 @@ exports.deleteTask = asyncHandler ( async (req, res) => {
   const project = await Project.findById(req.params.projectId);
   project.tasks = project.tasks.filter(taskId => taskId.toString() !== req.params.taskId);
   await project.save();
+
+  await createTaskNotification(req.params.projectId, `The task "${task.name}" has been deleted from the project "${project.name}"`);
 
   res.status(200).json({ message: 'Task deleted successfully' });
 });

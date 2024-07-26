@@ -9,8 +9,8 @@ const {
   deleteProject,
 } = require('../controllers/projectController');
 const {
+  inviteMemberToProject,
   getProjectMembers,
-  addMemberToProject,
   removeMemberFromProject,
 } = require('../controllers/projectMemberController');
 const {
@@ -32,10 +32,13 @@ router.route('/:projectId')
       .patch(auth, updateProject)
       .delete(auth, deleteProject);
 
+// /api/v1/projects/:projectId/invite
+router.route('/:projectId/invite')
+      .post(auth, inviteMemberToProject);
+
 // /api/v1/projects/:projectId/members
 router.route('/:projectId/members')
       .get(auth, getProjectMembers)
-      .post(auth, addMemberToProject)
       .delete(auth, removeMemberFromProject);
 
 // /api/v1/projects/:projectId/tasks

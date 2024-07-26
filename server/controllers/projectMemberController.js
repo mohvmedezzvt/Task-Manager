@@ -1,7 +1,51 @@
 const Project = require('../models/Project');
+const Invitation = require('../models/Invitation');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 const asyncHandler = require('express-async-handler');
+
+/**
+ * @desc    Invite a member to a project
+ * @route   POST /api/v1/projects/:projectId/invite
+ * @access  Private
+ */
+exports.inviteMemberToProject = asyncHandler(async (req, res) => {
+  const { projectId } = req.params;
+  const { recipientId } = req.body;
+  if (!recipientId) return res.status(400).json({ message: 'Member ID is required' });
+
+  const project = await Project.findById(projectId);
+  if (!project) return res.status(404).json({ message: 'Project not found' });
+
+  if (project.createdBy.toString() !== req.user._id.toString() && !project.members.some(member => member._id.equals(req.user._id))) {
+    return res.status(403).json({ message: 'You are not authorized to invite members to this project' });
+  }
+
+  const recipient = await User.findById(recipientId);
+  if (!recipient) return res.status(404).json({ message: 'Recipient not found' });
+
+  if (project.members.some(member => member.equals(recipientId))) {
+    return res.status(400).json({ message: 'User is already a member of this project' });
+  }
+
+  const existingInvitation = await Invitation.findOne({ project: projectId, recipient: recipientId });
+  if (existingInvitation) {
+    return res.status(400).json({ message: 'Invitation has already been sent to this user' });
+  }
+
+  const invitation = await Invitation.create({
+    project: projectId,
+    sender: req.user._id,
+    recipient: recipientId,
+  });
+
+  await Notification.create({
+    user: recipientId,
+    message: `You have been invited to join the project ${project.name}`,
+  });
+
+  res.status(201).json({ message: 'Invitation sent successfully', invitation });
+});
 
 /**
  * @desc    Get all members of a project
@@ -20,43 +64,6 @@ exports.getProjectMembers = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json({ members: project.members });
-});
-
-/**
- * @desc    Add a member to a project
- * @route   POST /api/v1/projects/:projectId/members
- * @access  Private
- */
-exports.addMemberToProject = asyncHandler(async (req, res) => {
-  const { memberId } = req.body;
-  if (!memberId) return res.status(400).json({ message: 'Member ID is required' });
-
-  const user = await User.findById(memberId);
-  if (!user) return res.status(404).json({ message: 'User not found' });
-
-  const project = await Project.findById(req.params.projectId);
-  if (!project) return res.status(404).json({ message: 'Project not found' });
-
-  if (project.createdBy.toString() !== req.user._id.toString() && !project.members.includes(req.user._id)) {
-    return res.status(403).json({ message: 'You are not authorized to add members to this project' });
-  }
-
-  if (project.members.includes(memberId)) {
-    return res.status(400).json({ message: 'User is already a member of this project' });
-  }
-
-  project.members.push(memberId);
-  await project.save();
-
-  await User.findByIdAndUpdate(memberId, { $push: { projects: project._id } });
-
-  const notification = new Notification({
-    user: memberId,
-    message: `You have been added to the project ${project.name}`,
-  });
-  await notification.save();
-
-  res.status(200).json({ message: 'Member added to project successfully' });
 });
 
 /**
