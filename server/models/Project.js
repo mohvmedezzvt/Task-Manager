@@ -25,6 +25,10 @@ const projectSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Task',
   }],
+  completed: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 const Project = mongoose.model('Project', projectSchema);

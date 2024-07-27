@@ -7,6 +7,7 @@ const {
   createProject,
   updateProject,
   deleteProject,
+  markProjectAsCompleted,
 } = require('../controllers/projectController');
 const {
   inviteMemberToProject,
@@ -31,6 +32,10 @@ router.route('/:projectId')
       .get(auth, getProject)
       .patch(auth, updateProject)
       .delete(auth, deleteProject);
+
+// /api/v1/projects/:projectId/complete
+router.route('/:projectId/complete')
+      .patch(auth, markProjectAsCompleted);
 
 // /api/v1/projects/:projectId/invite
 router.route('/:projectId/invite')

@@ -119,3 +119,22 @@ exports.deleteProject = asyncHandler(async (req, res) => {
 
   res.status(200).json({ message: 'Project deleted successfully' });
 });
+
+/**
+ * @description   Mark a project as completed
+ * @route         PATCH /api/v1/projects/:projectId/complete
+ * @access        Private
+ */
+exports.markProjectAsCompleted = asyncHandler(async (req, res) => {
+  const project = await Project.findById(req.params.projectId);
+  if (!project) return res.status(404).json({ message: 'Project not found' });
+
+  if (project.createdBy.toString() !== req.user._id.toString()) {
+    return res.status(403).json({ message: 'You are not authorized to complete this project' });
+  }
+
+  project.completed = req.body.completed !== undefined ? req.body.completed : project.completed;
+  await project.save();
+
+  res.status(200).json({ project });
+});
