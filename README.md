@@ -22,6 +22,7 @@ This repository contains the backend code for a Task-Manager. The backend is bui
 - Task management (CRUD operations)
 - Team management (add/remove members)
 - Notifications for project members
+- Ptoject invitations
 
 ## Installation
 
@@ -62,6 +63,11 @@ This repository contains the backend code for a Task-Manager. The backend is bui
   POST /api/v1/auth/login
   ```
 
+- Get the current user:
+  ```http
+  GET /api/v1/users/me
+  ```
+
 ### Projects
 
 - Get all projects:
@@ -72,6 +78,11 @@ This repository contains the backend code for a Task-Manager. The backend is bui
 - Get a project by ID:
   ```http
   GET /api/v1/projects/:projectId
+  ```
+
+- Create a project:
+  ```http
+  POST /api/v1/projects
   ```
 
 - Update a project:
@@ -86,14 +97,24 @@ This repository contains the backend code for a Task-Manager. The backend is bui
 
 ### Project Members
 
+- Get all invitations:
+  ```http
+  GET /api/v1/invitations
+  ```
+
 - Get all members of a project:
   ```http
   GET /api/v1/projects/:projectId/members
   ```
 
-- Add a member to a project:
+- Invite a user to a project:
   ```http
-  POST /api/v1/projects/:projectId/members
+  POST /api/v1/projects/:projectId/invite
+  ```
+
+- Respond to an invitation:
+  ```http
+  PATCH /api/v1/invitations/:invitationId
   ```
 
 - Remove a member from a project:
@@ -121,6 +142,11 @@ This repository contains the backend code for a Task-Manager. The backend is bui
 - Update a task:
   ```http
   PATCH /api/v1/tasks/:taskId
+  ```
+
+- Update a task priority:
+  ```http
+  PATCH /api/v1/projects/:projectId/tasks/:taskId/priority
   ```
 
 - Delete a task:
@@ -157,7 +183,6 @@ This repository contains the backend code for a Task-Manager. The backend is bui
 - `username`: String, required
 - `email`: String, required, unique
 - `password`: String, required
-- `role`: String (e.g., "pending", "in-progress", "completed")
 - `projects`: Array of Project references
 
 ### Project
@@ -177,6 +202,7 @@ This repository contains the backend code for a Task-Manager. The backend is bui
 - `createdBy`: User reference, required
 - `assignedTo`: User reference
 - `project`: Project reference, required
+- `priority`: String (e.g., "low", "medium", "high")
 
 ### Notification
 
@@ -211,4 +237,3 @@ This repository contains the backend code for a Task-Manager. The backend is bui
 ## License
 
 This project is licensed under the MIT License.
-
