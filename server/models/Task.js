@@ -34,6 +34,11 @@ const taskSchema = new mongoose.Schema({
     ref: 'Project',
     required: true,
   },
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high'],
+    default: 'medium',
+  },
 }, { timestamps: true });
 
 const Task = mongoose.model('Task', taskSchema);

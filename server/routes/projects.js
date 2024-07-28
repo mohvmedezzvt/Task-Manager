@@ -19,6 +19,7 @@ const {
   createTask,
   getTask,
   updateTask,
+  updateTaskPriority,
   deleteTask,
 } = require('../controllers/tasksController');
 
@@ -56,5 +57,9 @@ router.route('/:projectId/tasks/:taskId')
       .get(auth, getTask)
       .patch(auth, updateTask)
       .delete(auth, deleteTask);
+
+// /api/v1/projects/:projectId/tasks/:taskId/priority
+router.route('/:projectId/tasks/:taskId/priority')
+      .patch(auth, updateTaskPriority);
 
 module.exports = router;
