@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Project = require('../models/Project');
 const Invitation = require('../models/Invitation');
 const User = require('../models/User');
@@ -12,7 +13,16 @@ const asyncHandler = require('express-async-handler');
 exports.inviteMemberToProject = asyncHandler(async (req, res) => {
   const { projectId } = req.params;
   const { recipientId } = req.body;
+
   if (!recipientId) return res.status(400).json({ message: 'Member ID is required' });
+
+  if (!mongoose.Types.ObjectId.isValid(projectId)) {
+    return res.status(404).json({ message: 'Project not found' });
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(recipientId)) {
+    return res.status(404).json({ message: 'User not found' });
+  }
 
   const project = await Project.findById(projectId);
   if (!project) return res.status(404).json({ message: 'Project not found' });
@@ -22,7 +32,7 @@ exports.inviteMemberToProject = asyncHandler(async (req, res) => {
   }
 
   const recipient = await User.findById(recipientId);
-  if (!recipient) return res.status(404).json({ message: 'Recipient not found' });
+  if (!recipient) return res.status(404).json({ message: 'User not found' });
 
   if (project.members.some(member => member.equals(recipientId))) {
     return res.status(400).json({ message: 'User is already a member of this project' });
