@@ -3,6 +3,8 @@ const app = require('../../app');
 const mongoose = require('mongoose');
 const User = require('../../models/User');
 
+require('dotenv').config({ path: '.env.test' });
+
 describe('User authentication', () => {
   beforeEach(async () => {
     await mongoose.connection.close();
