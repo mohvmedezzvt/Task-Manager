@@ -6,9 +6,11 @@ const User = require('../../models/User');
 require('dotenv').config({ path: '.env.test' });
 
 describe('User authentication', () => {
-  beforeEach(async () => {
-    await mongoose.connection.close();
+  beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_URI);
+  });
+
+  beforeEach(async () => {
     await User.deleteMany({});
   });
 
@@ -18,8 +20,6 @@ describe('User authentication', () => {
 
   afterAll(async () => {
     await mongoose.connection.close();
-    await mongoose.connect(process.env.MONGO_URI);
-    await User.deleteMany({});
   });
 
   describe('User registration', () => {
