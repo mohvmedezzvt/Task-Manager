@@ -13,10 +13,15 @@ describe('Project invitation', () => {
 
   beforeAll(async () => {
     await connectDB(process.env.MONGO_URI);
+    await User.deleteMany();
+    await Project.deleteMany();
+    await Invitation.deleteMany();
+  });
 
+  beforeEach(async () => {
     user = await User.create({
-      username: 'testuser',
-      email: 'test@example.com',
+      username: 'testuserforinvite',
+      email: 'testforinvite@example.com',
       password: 'password',
     });
 
@@ -30,10 +35,13 @@ describe('Project invitation', () => {
     });
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await User.deleteMany();
     await Project.deleteMany();
     await Invitation.deleteMany();
+  });
+
+  afterAll(async () => {
     await mongoose.connection.close();
   });
 

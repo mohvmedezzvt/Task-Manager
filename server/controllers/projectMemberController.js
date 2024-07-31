@@ -34,7 +34,7 @@ exports.inviteMemberToProject = asyncHandler(async (req, res) => {
   const recipient = await User.findById(recipientId);
   if (!recipient) return res.status(404).json({ message: 'User not found' });
 
-  if (project.members.some(member => member.equals(recipientId))) {
+  if (project.members.includes(recipientId)) {
     return res.status(400).json({ message: 'User is already a member of this project' });
   }
 

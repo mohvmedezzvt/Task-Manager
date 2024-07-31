@@ -40,10 +40,10 @@ exports.login = asyncHandler(async (req, res) => {
   if (error) return res.status(400).json({ message: error.details[0].message });
 
   let user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(400).json({ message: 'Invalid email or password' });
+  if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
   const validPassword = await bcrypt.compare(req.body.password, user.password);
-  if (!validPassword) return res.status(400).json({ message: 'Invalid email or password' });
+  if (!validPassword) return res.status(400).json({ message: 'Invalid credentials' });
 
   const token = user.generateAuthToken();
   res.status(200).json({ token });
