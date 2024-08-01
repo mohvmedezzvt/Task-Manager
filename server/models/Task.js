@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const taskSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, 'Task name is required'],
     trim: true,
     minlength: [3, 'Task name must be at least 3 characters long'],
     maxlength: [50, 'Task name must not exceed 50 characters'],
@@ -32,7 +32,7 @@ const taskSchema = new mongoose.Schema({
   project: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project',
-    required: true,
+    default: null,
   },
   priority: {
     type: String,
