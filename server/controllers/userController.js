@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const InvalidToken = require('../models/InvalidToken');
 const asyncHandler = require('express-async-handler');
 const { validateUpdate } = require('../validations/userValidation');
 
@@ -28,12 +29,14 @@ exports.updateUser = asyncHandler(async (req, res) => {
   const { error } = validateUpdate(req.body)
   if (error) return res.status(400).json({ message: error.details[0].message });
 
+  if (req.body.email) return res.status(400).json({ message: 'Email cannot be updated' });
+
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
       $set: {
         username: req.body.username,
-        email: req.body.email,
+        bio: req.body.bio,
       }
     }, { new: true, runValidators: true }
   ).select('-password');
@@ -49,8 +52,17 @@ exports.updateUser = asyncHandler(async (req, res) => {
  * @access  Private
  */
 exports.deleteUser = asyncHandler(async (req, res) => {
-  const user = await User.findByIdAndDelete(req.user._id);
+  const user = await User.findById(req.user._id);
   if (!user) return res.status(404).json({ message: 'User not found' });
+
+  const token = req.header('Authorization')?.split(' ')[1];
+  const invalidToken = new InvalidToken({
+    token,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  });
+  await invalidToken.save();
+
+  await user.deleteOne();
 
   res.status(200).json({ message: 'User deleted successfully' });
 });

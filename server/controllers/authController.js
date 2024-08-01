@@ -21,6 +21,7 @@ exports.register = asyncHandler(async (req, res) => {
   user = new User({
     username: req.body.username,
     email: req.body.email,
+    bio: req.body.bio,
     password: hashedPassword,
   });
 

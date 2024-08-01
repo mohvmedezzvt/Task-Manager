@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
     minlength: [3, 'Username must be at least 3 characters long'],
     maxlength: [20, 'Username must not exceed 20 characters'],
   },
+  bio: {
+    type: String,
+    maxlength: [100, 'Bio must not exceed 100 characters'],
+  },
   email: {
     type: String,
     required: true,
@@ -34,9 +38,26 @@ const userSchema = new mongoose.Schema({
   }],
 }, { timestamps: true });
 
+userSchema.pre('remove', async function (next) {
+  await this.model('Task').deleteMany({ createdBy: this._id });
+  await this.model('Project').deleteMany({ createdBy: this._id });
+
+  await this.model('Task').updateMany(
+    { assignedTo: this._id },
+    { $unset: { assignedTo: '' } }
+  );
+
+  await this.model('Project').updateMany(
+    { members: this._id },
+    { $pull: { members: this._id } }
+  );
+
+  next();
+});
+
 userSchema.methods.generateAuthToken = function () {
   return jwt.sign({ _id: this._id, role: this.role }, process.env.JWT_SECRET, {
-    expiresIn: '1h',
+    expiresIn: '7d',
   });
 };
 

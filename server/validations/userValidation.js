@@ -14,6 +14,7 @@ const complexityOptions = {
 function validateUser(user) {
   const schema = Joi.object({
     username: Joi.string().trim().min(3).max(20).required(),
+    bio: Joi.string().max(100),
     email: Joi.string().trim().email().required(),
     password: passwordComplexity(complexityOptions).required().messages({
       "string.base": `Password should be a type of 'text'`,
@@ -39,7 +40,7 @@ function validateLogin(user) {
 function validateUpdate(user) {
   const schema = Joi.object({
     username: Joi.string().trim().min(3).max(20),
-    email: Joi.string().trim().email(),
+    bio: Joi.string().max(100),
   });
 
   return schema.validate(user);
