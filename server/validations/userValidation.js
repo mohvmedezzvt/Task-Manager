@@ -37,6 +37,20 @@ function validateLogin(user) {
   return schema.validate(user);
 };
 
+function validateResetPassword(user) {
+  const schema = Joi.object({
+    password: passwordComplexity(complexityOptions).required().messages({
+      "string.base": `Password should be a type of 'text'`,
+      "string.empty": `Password cannot be an empty field`,
+      "string.min": `Password should be at least 8 characters long`,
+      "any.required": `Password is a required field`,
+      "passwordComplexity": `Password must meet complexity requirements`
+    }),
+  });
+
+  return schema.validate(user);
+};
+
 function validateUpdate(user) {
   const schema = Joi.object({
     username: Joi.string().trim().min(3).max(20),
@@ -49,5 +63,6 @@ function validateUpdate(user) {
 module.exports = {
   validateUser,
   validateLogin,
+  validateResetPassword,
   validateUpdate,
 };

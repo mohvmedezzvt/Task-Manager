@@ -4,6 +4,7 @@ const logger = require('./middlewares/logger');
 const notFound = require('./middlewares/not-found');
 const errorHandler = require('./middlewares/error-handler');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 
 require('./utils/notificationScheduler');
 require('dotenv').config();
@@ -12,7 +13,7 @@ const app = express();
 
 // Middlewares
 app.use(cors());
-app.use(express.static('./public'));
+app.use(bodyParser.json());
 app.use(express.json());
 app.use(logger);
 
