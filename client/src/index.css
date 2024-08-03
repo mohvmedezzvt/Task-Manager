@@ -1,0 +1,14 @@
+/* Some resets */
+* {
+  padding: 0;
+  margin: 0;
+  font-family: "Rubik", sans-serif;
+}
+ul {
+  list-style-type: none;
+  display: flex;
+}
+a {
+  text-decoration: none;
+  color: black;
+}
