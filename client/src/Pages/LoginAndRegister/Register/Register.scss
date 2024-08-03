@@ -1,0 +1,29 @@
+/* Start regester page */
+@use '../variables';
+.register-form {
+    z-index: 100;
+    background-color: white;
+    border-radius: 10px;
+    padding: 25px;
+    height: fit-content;
+    width: 40%;
+    & > img {
+        width: 200px;
+        margin-bottom: 20px;
+    }
+    & span {
+        color: gray;
+        display: block;
+    }
+}
+.signUp-ref {
+    display: flex;
+    justify-content: center;
+    & span a {
+        transition: 0.1s;
+        &:hover {
+            color: variables.$sec-color;
+        }
+    }
+}
+/* End  regester page */
