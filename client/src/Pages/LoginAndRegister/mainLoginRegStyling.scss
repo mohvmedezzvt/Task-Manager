@@ -1,0 +1,216 @@
+@use 'variables';
+/* Start Framework */
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.pos-relative {
+    position: relative;
+}
+.pos-absolute {
+    position: absolute;
+}
+/* End Framework */
+/* Start main page */
+.main-page {
+    background-color: white;
+    width: 100vw;
+    height: 100vh;
+}
+.backgroundProps {
+    width: 65vw;
+    border: 5px solid variables.$sec-color;
+    border-radius: 30px;
+    background-image: url('./assets/dashboard.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+/* Start form illustrations */
+.form-illustration {
+    flex-basis: 50%;
+    z-index: 100;
+    & > img {
+        max-width: 70%;
+    }
+}
+/* End form illustrations */
+.form-background {
+    height: 80vh;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: 0 50px;
+    &:after {
+        position: absolute;
+        content: "";
+        width: calc(100% + 5px);
+        height: calc(100% + 5px);
+        background-color: variables.$main-color;
+        border-radius: 30px;
+        left: -2px;
+        top: -2px;
+    }
+}
+.separator {
+    text-align: center;
+    margin: 15px auto;
+}
+form {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    position: relative;
+    height: fit-content;
+    & > div.user-info {
+        display: flex;
+        height: variables.$input-height;
+        border-radius: 5px;
+        border: 0.1px solid variables.$input-border;
+        overflow: hidden;
+        margin-bottom: 25px;
+        & input {
+            height: 100%;
+            border: none;
+            outline: none;
+            width: 93%;
+            padding-left: 15px;
+        }
+        & .icon {
+            background-color: #eeeeee;
+            width: 7%;
+            height: 100%;
+            border-right: 0.1px solid #ddd;
+            & > * {
+                font-size: 15px;
+            }
+        }
+    }
+}
+/* End main page */
+/* Start auth form */
+.auth-form {
+    z-index: 100;
+    background-color: white;
+    border-radius: 10px;
+    padding: 25px;
+    height: fit-content;
+    width: 40%;
+    & > img {
+        width: 200px;
+        margin-bottom: 20px;
+    }
+    & > span {
+        color: gray;
+        display: block;
+    }
+}
+/* Start social media platform auth */
+.google-auth {
+    height: variables.$input-height;
+    margin: 20px auto 20px;
+    position: relative;
+    width: 60%;
+    & > a {
+        height: variables.$input-height;
+        position: absolute;
+        width: 100%;
+        transition: all 0.2s;
+        border: 1px solid variables.$input-border;
+        border-radius: 4px;
+        bottom: 0;
+        &:hover {
+            bottom: 3px;
+            box-shadow: 0px 4px 4px -5px rgba(0,0,0,0.8);
+        }
+        & img {
+            width: 15px;
+            height: 15px;
+            margin-right: 30px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    }
+}
+/* End social media platform auth */
+/* End auth form */
+.register-btn,
+.login-btn,
+.SendResetEmailBtn-btn {
+    position: relative;
+    margin-bottom: 25px;
+    & button {
+        height: variables.$input-height;
+        outline: none;
+        border: none;
+        background-color: variables.$main-color;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 35px;
+        transition: 0.1s;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+    }
+    & button:hover {
+        bottom: 2px;
+        box-shadow: 0px 5px 7px -3px rgba(0,0,0,0.8);
+    }
+}
+.register-btn {
+    margin-top: 40px;
+}
+.SendResetEmailBtn-btn {
+    margin-top: 40px;
+} 
+
+/* Start Responsive design */
+@media (min-width: 340px) and (max-width: 1023px) {
+    .form-illustration {
+        display: none;
+    }
+    .form-background {
+        display: block;
+        height: 100%;
+        width: 100%;
+        &:after {
+            display: none;
+        }
+    }
+    .backgroundProps {
+        border: none;
+        border-radius: 0;
+        background-image: none;
+    }
+    .auth-form {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 85%;
+        height: 90%;
+    }
+    .icon {
+        width: 15%;
+    }
+}
+.reset-password-instructions {
+    background-color: rgba(16, 115, 115, 0.8588235294);
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 30px auto 40px;
+    border: 1px solid rgba(16, 115, 115, 0.86);
+}
+.reset-password-form {
+    width: 60%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+/* End Responsive design */
