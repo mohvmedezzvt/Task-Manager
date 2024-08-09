@@ -18,8 +18,8 @@ This repository contains the backend code for a Task-Manager. The backend is bui
 ## Features
 
 - User authentication and authorization
-- Project management (CRUD operations)
-- Task management (CRUD operations)
+- Project management (CRUD operations) with lazy loading and projection
+- Task management (CRUD operations) with lazy loading and projection
 - Team management (add/remove members)
 - Notifications for project members
 - Ptoject invitations
