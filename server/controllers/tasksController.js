@@ -7,17 +7,40 @@ const User = require('../models/User');
 
 /**
  * @description Get all tasks for the user
- * @route GET /api/v1/tasks
+ * @route GET /api/v1/tasks - ?status=completed&assignedTo=userId&priority=high&dueDate=2024-12-31&sort=createdAt:desc&limit=10&page=1&search=keyword
  * @access Private
  */
-exports.getAllTasks = asyncHandler ( async (req, res) => {
-  const tasks = await Task.find({ createdBy: req.user._id })
-                          .populate('assignedTo', 'username email')
-                          .populate('project', 'name members')
-                          .exec();
+exports.getAllTasks = asyncHandler(async (req, res) => {
+  const { status, assignedTo, priority, dueDate, sort, page = 1, limit = 10, search } = req.query;
+
+  const queryObj = { createdBy: req.user._id };
+
+  if (status) query.status = status;
+  if (assignedTo) query.assignedTo = assignedTo;
+  if (priority) query.priority = priority;
+  if (dueDate) query.dueDate = { $gte: new Date(dueDate) };
+
+  // Partial text search
+  if (search) {
+    const searchRegex = new RegExp(search, 'i');
+    queryObj.$or = [
+      { name: searchRegex },
+      { description: searchRegex },
+    ];
+  }
+
+  const tasksQuery = Task.find(queryObj)
+    .populate('assignedTo', 'username email')
+    .populate('project', 'name members')
+    .sort(sort ? sort.split(',').join(' ') : '-createdAt')
+    .skip((page - 1) * limit)
+    .limit(parseInt(limit, 10));
+
+  const tasks = await tasksQuery.exec();
 
   if (!tasks.length) return res.status(404).json({ message: 'No tasks found' });
 
+  // Authorization check
   const authorizedTasks = tasks.filter(task => {
     if (!task.project) return true;
     return task.project.members.some(member => member.toString() === req.user._id.toString());
@@ -25,7 +48,15 @@ exports.getAllTasks = asyncHandler ( async (req, res) => {
 
   if (!authorizedTasks.length) return res.status(403).json({ message: 'You are not authorized to view any tasks' });
 
-  res.status(200).json({ tasks: authorizedTasks });
+  const totalTasks = await Task.countDocuments(queryObj);
+  const totalPages = Math.ceil(totalTasks / limit);
+
+  res.status(200).json({
+    results: authorizedTasks.length,
+    page: parseInt(page, 10),
+    totalPages,
+    tasks: authorizedTasks,
+  });
 });
 
 /**
@@ -35,14 +66,21 @@ exports.getAllTasks = asyncHandler ( async (req, res) => {
  */
 exports.getTask = asyncHandler(async (req, res) => {
   const task = await Task.findById(req.params.taskId)
-                         .populate('assignedTo', 'username email')
-                         .populate('project', 'name members')
-                         .exec();
+    .populate('assignedTo', 'username email')
+    .populate({
+      path: 'project',
+      select: 'name members',
+      populate: {
+        path: 'members',
+        select: '_id',
+      },
+    })
+    .exec();
 
   if (!task) return res.status(404).json({ message: 'Task not found' });
 
   if (task.project) {
-    const isMember = task.project.members.some(member => member.toString() === req.user._id.toString());
+    const isMember = task.project.members.some(member => member._id.toString() === req.user._id.toString());
     if (!isMember) return res.status(403).json({ message: 'You are not authorized to view this task' });
   }
 
@@ -64,7 +102,7 @@ exports.createTask = asyncHandler(async (req, res) => {
   if (projectId) {
     project = await Project.findById(projectId);
     if (!project) return res.status(404).json({ message: `No project with id: ${projectId}` });
-  
+
     if (project.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'You are not authorized to create a task in this project' });
     }
@@ -141,7 +179,7 @@ exports.updateTaskPriority = asyncHandler(async (req, res) => {
   await task.save();
 
   if (task.project) {
-  await createTaskNotification(task.project._id, `The priority of the task "${task.name}" has been updated in the project "${task.project.name}"`);
+    await createTaskNotification(task.project._id, `The priority of the task "${task.name}" has been updated in the project "${task.project.name}"`);
   }
 
   res.status(200).json({ task });
@@ -227,7 +265,7 @@ exports.assignTaskToMember = asyncHandler(async (req, res) => {
  * @route DELETE /api/v1/tasks/:taskId
  * @access Private
  */
-exports.deleteTask = asyncHandler ( async (req, res) => {
+exports.deleteTask = asyncHandler(async (req, res) => {
   const task = await Task.findById(req.params.taskId);
   if (!task) return res.status(404).json({ message: `No task with id: ${req.params.taskId}` });
 

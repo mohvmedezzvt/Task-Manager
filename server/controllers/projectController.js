@@ -6,25 +6,65 @@ const User = require('../models/User');
 
 /**
  * @desc    Get all projects for the user
- * @route   GET /api/v1/projects
+ * @route   GET /api/v1/projects - ?sort=name:asc&limit=10&page=1&search=keyword
  * @access  Private
  */
 exports.getAllProjects = asyncHandler(async (req, res) => {
-  const projects = await Project.find({ members: req.user._id })
-                                .populate('createdBy', 'username email')
-                                .populate('members', 'username email')
-                                .populate({
-                                  path: 'tasks',
-                                  select: 'name description status dueDate',
-                                  populate: {
-                                    path: 'assignedTo',
-                                    select: 'username email'
-                                  }
-                                })
-                                .exec();
+  const { sort, page = 1, limit = 10, search } = req.query;
+
+  const query = { members: req.user._id };
+
+  // Partial text search
+  if (search) {
+    const searchRegex = new RegExp(search, 'i');
+    query.$or = [
+      { name: searchRegex },
+      { description: searchRegex },
+    ];
+  }
+
+  // Projection
+  const projection = 'name description createdBy completed createdAt';
+
+  let projectsQuery = Project.find(query, projection);
+
+  // Sorting
+  if (sort) {
+    const sortBy = sort.split(',').join(' ');
+    projectsQuery = projectsQuery.sort(sortBy);
+  } else {
+    projectsQuery = projectsQuery.sort('-createdAt');
+  }
+
+  // Pagination
+  const skip = (page - 1) * limit;
+  projectsQuery = projectsQuery.skip(skip).limit(Number(limit));
+
+  const projects = await projectsQuery
+    .populate('createdBy', 'username')
+    .exec();
 
   if (!projects.length) return res.status(404).json({ message: 'No projects found' });
-  res.status(200).json({ projects });
+
+  const projectsWithCount = await Promise.all(projects.map(async (project) => {
+    const membersCount = await Project.countDocuments({ _id: project._id, 'members': { $exists: true } }).exec();
+    const tasksCount = await Task.countDocuments({ project: project._id }).exec();
+    return {
+      ...project.toObject(),
+      membersCount,
+      tasksCount
+    };
+  }));
+
+  const totalProjects = await Project.countDocuments(query).exec();
+  const totalPages = Math.ceil(totalProjects / limit);
+
+  res.status(200).json({
+    results: projectsWithCount.length,
+    page: parseInt(page, 10),
+    totalPages,
+    projects: projectsWithCount
+  });
 });
 
 /**
@@ -33,18 +73,12 @@ exports.getAllProjects = asyncHandler(async (req, res) => {
  * @access  Private
  */
 exports.getProject = asyncHandler(async (req, res) => {
-  const project = await Project.findById(req.params.projectId)
-                                .populate('createdBy', 'username email')
-                                .populate('members', 'username email')
-                                .populate({
-                                  path: 'tasks',
-                                  select: 'name description status dueDate',
-                                  populate: {
-                                    path: 'assignedTo',
-                                    select: 'username email'
-                                  }
-                                })
-                                .exec();
+  const { projectId } = req.params;
+
+  const project = await Project.findById(projectId)
+    .select('name description createdBy members')
+    .populate('members', '_id')
+    .exec();
 
   if (!project) return res.status(404).json({ message: 'Project not found' });
 
@@ -52,7 +86,20 @@ exports.getProject = asyncHandler(async (req, res) => {
     return res.status(403).json({ message: 'You are not authorized to view this project' });
   }
 
-  res.status(200).json({ project });
+  const fullProject = await Project.findById(projectId)
+    .populate('createdBy', 'username email')
+    .populate('members', 'username email')
+    .populate({
+      path: 'tasks',
+      select: 'name description status dueDate',
+      populate: {
+        path: 'assignedTo',
+        select: 'username email',
+      },
+    })
+    .exec();
+
+  res.status(200).json({ project: fullProject });
 });
 
 /**
